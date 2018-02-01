@@ -36,8 +36,8 @@ defmodule FinancialSystem do
   end
 
   def same_currency(first, second) do
-    case {check_if_is_money(first),
-      check_if_is_money(second),
+    case {is_money(first),
+      is_money(second),
       first.iso == second.iso}
     do
       {:true, :true, :true} ->[:ok]
