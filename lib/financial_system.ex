@@ -21,12 +21,19 @@ defmodule FinancialSystem do
   end
 
   defmodule Money do
-    defstruct integer: 0, frac: 0, iso: %ISO{}
+    defstruct int: 0, frac: 0, iso: %ISO{}
   end
 
+  @doc """
+    Tests if a suspect is a FinancialSystem.Money struct
+
+    ## Parameters
+
+      - suspect: Maps that we want to ensure is Money.
+  """
   def is_money(suspect) do
     case{is_map(suspect),
-      Map.has_key?(suspect, :integer),
+      Map.has_key?(suspect, :int),
       Map.has_key?(suspect, :frac),
       Map.has_key?(suspect, :iso)}
     do
@@ -49,10 +56,38 @@ defmodule FinancialSystem do
     end
   end
 
-  # def sum (first, second) do
-  #   if first do
-  #
-  #   end
-  # end
 
+
+  def sum(first, second) do
+    guard = same_currency(first, second)
+    return =
+      if guard do
+        frac_sum = first.frac + second.frac
+        int_sum = first.int + second.int
+        #fist value too big for the frac
+        ten_times_exponent = :math.pow(10, first.iso.exponent) |> round
+        carryover =
+          if abs(frac_sum) > abs(ten_times_exponent) do
+            1
+          else
+            0
+          end
+        #performs the carryover
+        return = %Money{int: int_sum + carryover,
+        frac: frac_sum - (ten_times_exponent * carryover),
+        iso: first.iso}
+        #makes int and frac have the same sign
+        if(return.int != 0 and return.frac != 0) do
+          case {return.int < 0, return.frac < 0} do
+            {true, false} -> return = %{return | int: return.int - 1,
+            frac: return.frac + ten_times_exponent}
+            {false, true} -> return = %{return | int: return.int + 1,
+            frac: return.frac - ten_times_exponent}
+          end
+        end
+        return
+      else
+        guard
+      end
+  end
 end
