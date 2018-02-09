@@ -16,7 +16,7 @@ defmodule FinancialSystem do
     :world
   end
 
-  defmodule ISO do
+  defmodule Currency do
     @moduledoc """
     Provides a struct that stores ISO 4217 information.
     More info at https://en.wikipedia.org/wiki/ISO_4217
@@ -33,11 +33,15 @@ defmodule FinancialSystem do
 
     When the value is negative, both int and frac store are negative.
     """
-    defstruct int: 0, frac: 0, iso: %ISO{}
+    defstruct int: 0, frac: 0, currency: %Currency{}
   end
 
   defmodule Account do
     defstruct user: 0, balance: [%Money{}]
+  end
+
+  defmodule Ratio do
+    defstruct int: 1, frac: 0
   end
 
   @doc """
@@ -47,11 +51,18 @@ defmodule FinancialSystem do
 
       - suspect: Maps that we want to ensure is Money.
   """
+
+  #source: https://twitter.com/quviq/status/768435047569448960
+  #works because 10^exp in numeric base 'base' is base^exp
+  def pow(base, exp) do
+    Integer.undigits([1 | :lists.duplicate(exp, 0)], base)
+  end
+
   def is_money(suspect) do
     case{is_map(suspect),
       Map.has_key?(suspect, :int),
       Map.has_key?(suspect, :frac),
-      Map.has_key?(suspect, :iso)}
+      Map.has_key?(suspect, :currency)}
     do
       {:true, :true, :true, true} -> :true
       _ -> exit("Attempt to execute monetary operations with something else")
@@ -59,16 +70,16 @@ defmodule FinancialSystem do
   end
 
   @doc """
-    Tests if 2 maps use the same currency by checking their iso field.
+    Tests if 2 maps use the same currency by checking their currency field.
   """
   @spec same_currency(Money, Money) :: boolean
   def same_currency(first, second) do
     is_money(first)
     is_money(second)
-    unless(first.iso == second.iso) do
-      exit("Attempt to operate distinct currencies without convertion")
+    unless(first.currency == second.currency) do
+      exit("Attempt to operate distinct currencies without exchange")
     end
-      :ok
+      true
   end
 
 
@@ -79,7 +90,7 @@ defmodule FinancialSystem do
     frac_sum = first.frac + second.frac
     int_sum = first.int + second.int
     #fist value too big for the frac
-    ten_times_exponent = :math.pow(10, first.iso.exponent) |> round
+    ten_times_exponent = pow(10, first.currency.exponent)
     carryover =
       if abs(frac_sum) > abs(ten_times_exponent) do
         1
@@ -89,7 +100,7 @@ defmodule FinancialSystem do
     #performs the carryover
     return = %Money{int: int_sum + carryover,
       frac: frac_sum - (ten_times_exponent * carryover),
-      iso: first.iso}
+      currency: first.currency}
     #makes int and frac have the same sign
     return = if(return.int != 0 and return.frac != 0) do
       case {return.int < 0, return.frac < 0} do
@@ -157,5 +168,11 @@ defmodule FinancialSystem do
     end
     [source, destination]
   end
+
+  # def exchange(source, return, rate) do
+  #   #dealing with fractional
+  #   decimals = Integer.floor_div(rate, 10)
+  #   raw_frac = frac * ()
+  # end
 
 end
