@@ -104,15 +104,16 @@ defmodule FinancialSystem do
         end
       #performs the carryover
       return = %Money{int: int_sum + carryover,
-      frac: frac_sum - (ten_times_exponent * carryover),
-      iso: first.iso}
+        frac: frac_sum - (ten_times_exponent * carryover),
+        iso: first.iso}
       #makes int and frac have the same sign
       return = if(return.int != 0 and return.frac != 0) do
         case {return.int < 0, return.frac < 0} do
-          {true, false} -> %{return | int: return.int - 1,
-          frac: return.frac + ten_times_exponent}
-          {false, true} -> %{return | int: return.int + 1,
+          {true, false} -> %{return | int: return.int + 1,
           frac: return.frac - ten_times_exponent}
+          {false, true} -> %{return | int: return.int - 1,
+          frac: return.frac + ten_times_exponent}
+          _ -> return
         end
         else
           return
@@ -124,7 +125,7 @@ defmodule FinancialSystem do
   end
 
   def sub(first, second) do
-    #dummy
+    sum(first, %{second | int: -second.int, frac: -second.frac})
   end
 
   def compare(first, second) do
