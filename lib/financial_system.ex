@@ -41,7 +41,7 @@ defmodule FinancialSystem do
   end
 
   defmodule Ratio do
-    defstruct int: 1, frac: 0
+    defstruct value: 1, neg_exp_of_ten: 0
   end
 
   @doc """
@@ -169,10 +169,59 @@ defmodule FinancialSystem do
     [source, destination]
   end
 
-  # def exchange(source, return, rate) do
-  #   #dealing with fractional
-  #   decimals = Integer.floor_div(rate, 10)
-  #   raw_frac = frac * ()
-  # end
+
+  def exchange(source, return, rate) do
+    #Fist we apply the rate to the integer part
+    raw_int = source.int * rate.value
+    digits_raw_int = Integer.digits(raw_int)
+    int_of_raw_int = digits_raw_int |>
+      Enum.slice(0, length(digits_raw_int) - rate.neg_exp_of_ten) |>
+      Integer.undigits()
+    #The fractionary part of the raw_int must be used in the raw_frac
+    frac_of_raw_int = digits_raw_int |>
+      Enum.slice(length(digits_raw_int) - rate.neg_exp_of_ten, rate.neg_exp_of_ten) |>
+      Integer.undigits()
+
+    #Padding zeroes
+    overpadded_list = Integer.digits(frac_of_raw_int) ++ List.duplicate(0, 4)
+    frac_of_raw_int = Enum.slice(overpadded_list, 0, return.exponent) |>
+      Integer.undigits()
+
+    #We must truncate the frac_of_raw_int to add to frac_sum
+    trunc_frac_of_raw_int = Integer.digits(frac_of_raw_int) |>
+      Enum.slice(0, return.exponent) |> Integer.undigits()
+
+
+    #diff_in_size lets us know if the size of frac will change and how much
+    #it is positive if it should grow
+    diff_in_size = return.exponent - source.currency.exponent
+
+    raw_frac = source.frac * rate.value
+    digits_raw_frac = Integer.digits(raw_frac)
+    #Truncating the frac part by removing any aditional digits, after this line
+    #it is in the return frac size
+    truncated_frac = digits_raw_frac |>
+      Enum.slice(0, length(digits_raw_frac) - rate.neg_exp_of_ten + diff_in_size) |>
+      Integer.undigits()
+    #We are almost there, but we should solve carryovers first
+    almost_final_frac = truncated_frac + trunc_frac_of_raw_int
+    digits_afc = Integer.digits(almost_final_frac)
+
+    #TODO: transform truncate into function
+    {int_carryover, final_frac} =
+      if length(digits_afc) > return.exponent do
+        {digits_afc |>
+          Enum.slice(0, length(digits_afc) - return.exponent) |>
+          Integer.undigits(),
+         digits_afc |>
+           Enum.slice(length(digits_afc) - return.exponent,
+           length(digits_afc)) |> Integer.undigits()}
+      else
+        {0, almost_final_frac}
+      end
+    final_int = int_of_raw_int + int_carryover
+
+    %Money{int: final_int, frac: final_frac, currency: return}
+  end
 
 end
