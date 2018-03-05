@@ -21,7 +21,7 @@ defmodule FinancialSystem do
     Provides a struct that stores ISO 4217 information.
     More info at https://en.wikipedia.org/wiki/ISO_4217
     """
-    defstruct alpha_code: "BRL", numeric_code: 986, exponent: 2
+    defstruct [alpha_code: "BRL", numeric_code: 986, exponent: 2]
   end
 
   defmodule Money do
@@ -33,31 +33,41 @@ defmodule FinancialSystem do
 
     When the value is negative, both int and frac store are negative.
     """
-    defstruct int: 0, frac: 0, currency: %Currency{}
+    defstruct [int: 0, frac: 0, currency: %Currency{}]
   end
 
   defmodule Account do
-    defstruct user: 0, balance: [%Money{}]
+    @moduledoc """
+    Has an unique id and stores the balance in a List of Money as an account cha
+    have multiple currencies.
+    """
+    defstruct id: 0, balance: [%Money{}]
   end
 
   defmodule Ratio do
-    defstruct value: 1, neg_exp_of_ten: 0
+    @moduledoc """
+    Provides a struct that stores exchange rates
+    """
+    defstruct [value: 1, neg_exp_of_ten: 0]
   end
 
   @doc """
-    Tests if a suspect is a FinancialSystem.Money struct
-
-    ## Parameters
-
-      - suspect: Maps that we want to ensure is Money.
+  Integer power that is missing from the standard library.
+  source: https://twitter.com/quviq/status/768435047569448960
   """
-
-  #source: https://twitter.com/quviq/status/768435047569448960
-  #works because 10^exp in numeric base 'base' is base^exp
+  #Works because 10^exp in numeric base 'base' is base^exp
+  @spec pow(integer, integer) :: integer
   def pow(base, exp) do
     Integer.undigits([1 | :lists.duplicate(exp, 0)], base)
   end
 
+  @doc """
+  Tests if a suspect is a FinancialSystem.Money struct
+
+  ## Parameters
+
+    - suspect: Maps that we want to ensure is Money.
+  """
   def is_money(suspect) do
     case{is_map(suspect),
       Map.has_key?(suspect, :int),
@@ -70,9 +80,9 @@ defmodule FinancialSystem do
   end
 
   @doc """
-    Tests if 2 maps use the same currency by checking their currency field.
+  Tests if 2 maps use the same currency by checking their currency field.
   """
-  @spec same_currency(Money, Money) :: boolean
+  @spec same_currency(FinancialSystem.Money, FinancialSystem.Money) :: boolean
   def same_currency(first, second) do
     is_money(first)
     is_money(second)
@@ -82,8 +92,10 @@ defmodule FinancialSystem do
       true
   end
 
-
-
+  @doc """
+  Sums money.
+  """
+  @spec sum(FinancialSystem.Money, FinancialSystem.Money) :: FinancialSystem.Money
   def sum(first, second) do
     same_currency(first, second)
 
@@ -116,31 +128,52 @@ defmodule FinancialSystem do
     return
   end
 
+  @doc """
+  Subtracts money.
+  """
+  @spec sub(FinancialSystem.Money, FinancialSystem.Money) :: FinancialSystem.Money
   def sub(first, second) do
     sum(first, %{second | int: -second.int, frac: -second.frac})
   end
 
+  @doc """
+  Compares Money. Returns the atoms :greater, :equal or :smaller.
+  """
+  @spec compare(FinancialSystem.Money, FinancialSystem.Money) :: :atom
   def compare(first, second) do
     same_currency(first, second)
 
     cond do
       first.int > second.int ->
-        1
+        :greater
       first.int == second.int && first.frac > second.frac ->
-        1
+        :greater
       first.int == second.int && first.frac == second.frac ->
-        0
+        :equal
       true ->
-        -1
+        :smaller
     end
 
   end
 
+  @doc """
+  Transfers Money from one Account to another.
+
+  ### Parameters
+   - source:  The Account that is sending the money. Must have enough to pay.
+   - destination: The Account that is receiving the money.
+   - ammount: How much and what currency is going to be transfered.
+
+  ### Return
+    {FinancialSystem.Account, FinancialSystem.Account}, where the fist one is an
+    updated source and the second one is an updated second.
+  """
+  @spec transfer(FinancialSystem.Account, FinancialSystem.Account, FinancialSystem.Money) :: {FinancialSystem.Account, FinancialSystem.Account}
   def transfer(source, destination, amount) do
     #check if source has that amount
     [sour_balance | _] = Enum.filter(source.balance,
       fn(x) -> (same_currency(x, amount)) end)
-    source = if(compare(sour_balance, amount) >= 0) do
+    source = if(compare(sour_balance, amount) != :smaller) do
     #updating the source
      %{source | balance: Enum.map(source.balance, fn(x) ->
         if x == sour_balance do
@@ -166,10 +199,18 @@ defmodule FinancialSystem do
         x
       end end)}
     end
-    [source, destination]
+    {source, destination}
   end
 
+  @doc """
+  Performs monetary exchange.
 
+  ### Parameters
+    - source: The amount that is going to be converted.
+    - return: The Currency that is going to be the end result
+    - rate: The Ratio between the source and the return.
+  """
+  @spec exchange(FinancialSystem.Money, FinancialSystem.Currency, FinancialSystem.Ratio) :: FinancialSystem.Money
   def exchange(source, return, rate) do
     #Fist we apply the rate to the integer part
     raw_int = source.int * rate.value
