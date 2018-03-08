@@ -296,8 +296,17 @@ defmodule FinancialSystem do
 
   end
 
+  @spec is_sum_one([FinancialSystem.Ratio]) :: boolean
   def is_sum_one(ratios) do
-
+    total_ratios = Enum.reduce(ratios, fn(x, acc) -> sum_ratios(x, acc) end)
+    #there are infinite ways to write one in the ratio notation, so the best check is:
+    should_be_zero = sum_ratios(total_ratios, %Ratio{value: -1, neg_exp_of_ten: 0})
+    result =if(should_be_zero.value == 0) do
+      true
+    else
+      false
+    end
+    result
   end
 
   # @spec transfer_split([{FinancialSystem.Account, FinancialSystem.Ratio}], FinancialSystem.Money) :
