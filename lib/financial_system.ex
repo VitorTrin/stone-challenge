@@ -21,6 +21,7 @@ defmodule FinancialSystem do
     Provides a struct that stores ISO 4217 information.
     More info at https://en.wikipedia.org/wiki/ISO_4217
     """
+
     defstruct [alpha_code: "BRL", numeric_code: 986, exponent: 2]
   end
 
@@ -33,6 +34,7 @@ defmodule FinancialSystem do
 
     When the value is negative, both int and frac store are negative.
     """
+
     defstruct [int: 0, frac: 0, currency: %Currency{}]
   end
 
@@ -41,6 +43,7 @@ defmodule FinancialSystem do
     Has an unique id and stores the balance in a List of Money as an account cha
     have multiple currencies.
     """
+
     defstruct id: 0, balance: [%Money{}]
   end
 
@@ -48,6 +51,7 @@ defmodule FinancialSystem do
     @moduledoc """
     Provides a struct that stores exchange rates
     """
+
     defstruct [value: 1, neg_exp_of_ten: 0]
   end
 
@@ -109,6 +113,7 @@ defmodule FinancialSystem do
       else
         0
       end
+
     #performs the carryover
     return = %Money{int: int_sum + carryover,
       frac: frac_sum - (ten_times_exponent * carryover),
@@ -125,6 +130,7 @@ defmodule FinancialSystem do
       else
         return
       end
+
     return
   end
 
@@ -188,7 +194,8 @@ defmodule FinancialSystem do
     #updating or creating the destination
     [dest_balance | _] = Enum.filter(destination.balance,
       fn(x) -> (same_currency(x, amount)) end)
-    destination =  if dest_balance == nil do
+
+    destination = if dest_balance == nil do
       #if there is no such currency on the destination, we create it
       %{destination | balance: [amount | destination.balance]}
     else
@@ -199,6 +206,7 @@ defmodule FinancialSystem do
         x
       end end)}
     end
+
     {source, destination}
   end
 
@@ -218,6 +226,7 @@ defmodule FinancialSystem do
     int_of_raw_int = digits_raw_int |>
       Enum.slice(0, length(digits_raw_int) - rate.neg_exp_of_ten) |>
       Integer.undigits()
+
     #The fractionary part of the raw_int must be used in the raw_frac
     frac_of_raw_int = digits_raw_int |>
       Enum.slice(length(digits_raw_int) - rate.neg_exp_of_ten, rate.neg_exp_of_ten) |>
@@ -244,11 +253,11 @@ defmodule FinancialSystem do
     truncated_frac = digits_raw_frac |>
       Enum.slice(0, length(digits_raw_frac) - rate.neg_exp_of_ten + diff_in_size) |>
       Integer.undigits()
+
     #We are almost there, but we should solve carryovers first
     almost_final_frac = truncated_frac + trunc_frac_of_raw_int
     digits_afc = Integer.digits(almost_final_frac)
 
-    #TODO: transform truncate into function
     {int_carryover, final_frac} =
       if length(digits_afc) > return.exponent do
         {digits_afc |>
@@ -260,9 +269,40 @@ defmodule FinancialSystem do
       else
         {0, almost_final_frac}
       end
+
     final_int = int_of_raw_int + int_carryover
 
     %Money{int: final_int, frac: final_frac, currency: return}
+  end
+
+  @spec sum_ratios(FinancialSystem.Ratio, FinancialSystem.Ratio) :: FinancialSystem.Ratio
+  def sum_ratios(first_ratio, second_ratio) do
+    #First they must be in the same base, and for that we use the smaller base
+    greatest_base = if (first_ratio.neg_exp_of_ten >
+    second_ratio.neg_exp_of_ten) do
+      first_ratio.neg_exp_of_ten
+    else
+      second_ratio.neg_exp_of_ten
+    end
+
+    diff_base = greatest_base - first_ratio.neg_exp_of_ten
+    first_ratio = %{first_ratio | value: first_ratio.value * pow(10, diff_base)}
+
+    diff_base = greatest_base - second_ratio.neg_exp_of_ten
+    second_ratio = %{second_ratio | value: second_ratio.value * pow(10, diff_base)}
+
+    %Ratio{value: first_ratio.value + second_ratio.value,
+      neg_exp_of_ten: greatest_base}
+
+  end
+
+  def is_sum_one(ratios) do
+
+  end
+
+  # @spec transfer_split([{FinancialSystem.Account, FinancialSystem.Ratio}], FinancialSystem.Money) :
+  def transfer_split(splits, total_transfer) do
+      #First we much check if the sum of all rations is 1
   end
 
 end
