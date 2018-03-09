@@ -55,6 +55,8 @@ defmodule FinancialSystem do
     defstruct [value: 1, neg_exp_of_ten: 0]
   end
 
+  @padding 4
+
   @doc """
   Integer power that is missing from the standard library.
   source: https://twitter.com/quviq/status/768435047569448960
@@ -233,7 +235,7 @@ defmodule FinancialSystem do
       Integer.undigits()
 
     #Padding zeroes
-    overpadded_list = Integer.digits(frac_of_raw_int) ++ List.duplicate(0, 4)
+    overpadded_list = Integer.digits(frac_of_raw_int) ++ List.duplicate(0, @padding)
     frac_of_raw_int = Enum.slice(overpadded_list, 0, return.exponent) |>
       Integer.undigits()
 
@@ -315,15 +317,20 @@ defmodule FinancialSystem do
     exchange(money, money.currency, rate)
   end
 
-  # @spec transfer_split([%{account: FinancialSystem.Account, ratio: FinancialSystem.Ratio}], FinancialSystem.Money) :
-  # def transfer_split(source, splits, total_transfer) do
-  #     #First we much check if the sum of all rations is 1
-  #     just_the_ratios = Enum.map(splits, fn(x) -> x.ratio)
-  #     unless(is_sum_one(just_the_ratios)) do
-  #       raise("The sum of the splits isn't the same as the total")
-  #     end
-  #
-  #     # Enum.map(splits, fn(x) -> )
-  # end
+  @spec transfer_split(FinancialSystem.Account, [%{account: FinancialSystem.Account, ratio: FinancialSystem.Ratio}], FinancialSystem.Money) :: [FinancialSystem.Account]
+  def transfer_split(source, splits, total_transfer) do
+      #First we much check if the sum of all rations is 1
+      just_the_ratios = Enum.map(splits, fn(x) -> x.ratio end)
+      unless(is_sum_one(just_the_ratios)) do
+        raise("The sum of the splits isn't the same as the total")
+      end
+
+      #To perform the transfer, first we transfer from the source to a temp account
+      {source, temp_acc} = transfer(source, %Account{id: -1}, total_transfer)
+
+      #If sucessful, now we can spread it around
+      [source | Enum.map(splits, fn(x) -> transfer(temp_acc, x.account,
+        mult(total_transfer, x.ratio)) end )]
+  end
 
 end
