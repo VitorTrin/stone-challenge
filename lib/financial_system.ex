@@ -110,7 +110,7 @@ defmodule FinancialSystem do
     #fist value too big for the frac
     ten_times_exponent = pow(10, first.currency.exponent)
     carryover =
-      if abs(frac_sum) > abs(ten_times_exponent) do
+      if abs(frac_sum) >= abs(ten_times_exponent) do
         1
       else
         0
