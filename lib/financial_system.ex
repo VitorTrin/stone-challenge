@@ -309,9 +309,21 @@ defmodule FinancialSystem do
     result
   end
 
-  # @spec transfer_split([{FinancialSystem.Account, FinancialSystem.Ratio}], FinancialSystem.Money) :
-  def transfer_split(splits, total_transfer) do
-      #First we much check if the sum of all rations is 1
+  @spec mult(FinancialSystem.Money, FinancialSystem.Ratio) :: FinancialSystem.Money
+  def mult(money, rate) do
+    #Rate multiplication is a case of exchange where the currency stays the same
+    exchange(money, money.currency, rate)
   end
+
+  # @spec transfer_split([%{account: FinancialSystem.Account, ratio: FinancialSystem.Ratio}], FinancialSystem.Money) :
+  # def transfer_split(source, splits, total_transfer) do
+  #     #First we much check if the sum of all rations is 1
+  #     just_the_ratios = Enum.map(splits, fn(x) -> x.ratio)
+  #     unless(is_sum_one(just_the_ratios)) do
+  #       raise("The sum of the splits isn't the same as the total")
+  #     end
+  #
+  #     # Enum.map(splits, fn(x) -> )
+  # end
 
 end
