@@ -67,30 +67,10 @@ defmodule FinancialSystem do
   end
 
   @doc """
-  Tests if a suspect is a FinancialSystem.Money struct
-
-  ## Parameters
-
-    - suspect: Maps that we want to ensure is Money.
-  """
-  def is_money(suspect) do
-    case{is_map(suspect),
-      Map.has_key?(suspect, :int),
-      Map.has_key?(suspect, :frac),
-      Map.has_key?(suspect, :currency)}
-    do
-      {:true, :true, :true, true} -> :true
-      _ -> exit("Attempt to execute monetary operations with something else")
-    end
-  end
-
-  @doc """
   Tests if 2 maps use the same currency by checking their currency field.
   """
   @spec same_currency(FinancialSystem.Money, FinancialSystem.Money) :: boolean
   def same_currency(first, second) do
-    is_money(first)
-    is_money(second)
     unless(first.currency == second.currency) do
       exit("Attempt to operate distinct currencies without exchange")
     end
