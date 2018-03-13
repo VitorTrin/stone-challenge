@@ -55,7 +55,6 @@ defmodule FinancialSystem do
     defstruct [value: 1, neg_exp_of_ten: 0]
   end
 
-  @padding 4
 
   @doc """
   Integer power that is missing from the standard library.
@@ -176,7 +175,7 @@ defmodule FinancialSystem do
     {FinancialSystem.Account, FinancialSystem.Account}, where the fist one is an
     updated source and the second one is an updated second.
   """
-  @spec transfer(FinancialSystem.Account, FinancialSystem.Account, FinancialSystem.Money) :: {FinancialSystem.Account, FinancialSystem.Account}
+  @spec transfer(FinancialSystem.Account, FinancialSystem.Account, FinancialSystem.Money) :: %{source: FinancialSystem.Account, destination: FinancialSystem.Account}
   def transfer(source, destination, amount) do
     #check if source has that amount
     [sour_balance | _] = Enum.filter(source.balance,
@@ -209,8 +208,12 @@ defmodule FinancialSystem do
       end end)}
     end
 
-    {source, destination}
+    %{source: source, destination: destination}
   end
+
+  #Used by exchange to perform int to frac carryovers. Should greater or equal
+  #to the largest currency exponent in the ISO_4217
+  @padding 4
 
   @doc """
   Performs monetary exchange.
@@ -278,7 +281,7 @@ defmodule FinancialSystem do
   end
 
   @spec sum_ratios(FinancialSystem.Ratio, FinancialSystem.Ratio) :: FinancialSystem.Ratio
-  def sum_ratios(first_ratio, second_ratio) do
+  defp sum_ratios(first_ratio, second_ratio) do
     #First they must be in the same base, and for that we use the smaller base
     greatest_base = if (first_ratio.neg_exp_of_ten >
     second_ratio.neg_exp_of_ten) do
@@ -299,7 +302,7 @@ defmodule FinancialSystem do
   end
 
   @spec is_sum_one([FinancialSystem.Ratio]) :: boolean
-  def is_sum_one(ratios) do
+  defp is_sum_one(ratios) do
     total_ratios = Enum.reduce(ratios, fn(x, acc) -> sum_ratios(x, acc) end)
     #there are infinite ways to write one in the ratio notation, so the best check is:
     should_be_zero = sum_ratios(total_ratios, %Ratio{value: -1, neg_exp_of_ten: 0})
@@ -312,10 +315,19 @@ defmodule FinancialSystem do
   end
 
   @spec mult(FinancialSystem.Money, FinancialSystem.Ratio) :: FinancialSystem.Money
-  def mult(money, rate) do
+  defp mult(money, rate) do
     #Rate multiplication is a case of exchange where the currency stays the same
     exchange(money, money.currency, rate)
   end
+
+  @doc """
+  Performs split payment.
+
+  ### Parameters
+    - source: The account the money comes from.
+    - splits: A list of maps that are pairs of destination account and it's ratio
+    - total_transfer: How much is the transfer.
+  """
 
   @spec transfer_split(FinancialSystem.Account, [%{account: FinancialSystem.Account, ratio: FinancialSystem.Ratio}], FinancialSystem.Money) :: [FinancialSystem.Account]
   def transfer_split(source, splits, total_transfer) do
@@ -326,11 +338,11 @@ defmodule FinancialSystem do
       end
 
       #To perform the transfer, first we transfer from the source to a temp account
-      {source, temp_acc} = transfer(source, %Account{id: -1}, total_transfer)
+      %{source: source, destination: temp_acc} = transfer(source, %Account{id: -1}, total_transfer)
 
       #If sucessful, now we can spread it around
       [source | Enum.map(splits, fn(x) -> transfer(temp_acc, x.account,
-        mult(total_transfer, x.ratio)) end )]
+        mult(total_transfer, x.ratio)).destination end )]
   end
 
 end

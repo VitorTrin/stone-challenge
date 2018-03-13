@@ -83,30 +83,62 @@ defmodule FinancialSystemTest do
       == %FinancialSystem.Money{int: 2, frac: 74}
   end
 
+  #Compare
+  test "compare/2 should compare money ammounts" do
+    #1 ? 1 = :equal
+    assert compare(%FinancialSystem.Money{int: 1},
+      %FinancialSystem.Money{int: 1}) == :equal
+    # 0 ? 1 = :smaller
+    assert compare(%FinancialSystem.Money{int: 0},
+        %FinancialSystem.Money{int: 1}) == :smaller
+    # 1 ? 0 = :greater
+    assert compare(%FinancialSystem.Money{int: 1},
+        %FinancialSystem.Money{int: 0}) == :greater
+    #0.1 ? 0.1 = :equal
+    assert compare(%FinancialSystem.Money{int: 1, frac: 1},
+      %FinancialSystem.Money{int: 1, frac: 1}) == :equal
+    # 0.1 ? 1.1 = :smaller
+    assert compare(%FinancialSystem.Money{int: 0, frac: 1},
+        %FinancialSystem.Money{int: 1, frac: 1}) == :smaller
+    # 1.1 ? 0.1 = :greater
+    assert compare(%FinancialSystem.Money{int: 1, frac: 1},
+        %FinancialSystem.Money{int: 0, frac: 1}) == :greater
+    #1.2 ? 1.1 = :greater
+    assert compare(%FinancialSystem.Money{int: 1, frac: 2},
+        %FinancialSystem.Money{int: 1, frac: 1}) == :greater
+    #0.2 ? 1.0 = :smaller
+    assert compare(%FinancialSystem.Money{int: 0, frac: 2},
+      %FinancialSystem.Money{int: 1, frac: 0}) == :smaller
+    #0.2 ? -1.0 = :greater
+    assert compare(%FinancialSystem.Money{int: 0, frac: 2},
+      %FinancialSystem.Money{int: -1, frac: 0}) == :greater
+    #-0.2 ? -1.0 = :greater
+    assert compare(%FinancialSystem.Money{int: 0, frac: -2},
+      %FinancialSystem.Money{int: -1, frac: 0}) == :greater
+  end
 
+  # Behavior tests
+  test "User should be able to transfer money to another account" do
+    donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
 
-  #Behavior tests
-  # test "User should be able to transfer money to another account" do
-  #   donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
-  #   recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
-  #
-  #   recipient = %FinancialSystem.Account{id: 0, balance: [recipient_balance]}
-  #   donor = %FinancialSystem.Account{id: 1, balance: [donor_balance]}
-  #
-  #   transfer_ammount = %FinancialSystem.Money{int: 102, frac: 50}
-  #
-  #   [donor_result, recipient_result] = FinancialSystem.transfer(donor, recipient, transfer_ammount)
-  #
-  #   donor_money = List.first(donor_result.balance)
-  #   recipient_money = List.first(recipient_result.balance)
-  #
-  #   assert donor_money.int == 4898
-  #   assert donor_money.frac == 49
-  #
-  #   assert recipient_money.int == 406
-  #   assert recipient_money.frac == 17
-  # end
-  #
+    donor = %FinancialSystem.Account{id: 1, balance: [donor_balance]}
+    recipient = %FinancialSystem.Account{id: 0, balance: [recipient_balance]}
+
+    transfer_ammount = %FinancialSystem.Money{int: 102, frac: 50}
+
+    %{source: donor_result, destination: recipient_result} = FinancialSystem.transfer(donor, recipient, transfer_ammount)
+
+    donor_money = List.first(donor_result.balance)
+    recipient_money = List.first(recipient_result.balance)
+
+    assert donor_money.int == 4898
+    assert donor_money.frac == 49
+
+    assert recipient_money.int == 406
+    assert recipient_money.frac == 17
+  end
+
   # test "User cannot transfer if not enough money available on the account" do
   #   donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
   #   recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
@@ -117,25 +149,55 @@ defmodule FinancialSystemTest do
   #   transfer_ammount = %FinancialSystem.Money{int: 60002, frac: 50}
   #
   #   [donor_result, recipient_result] = FinancialSystem.transfer(donor, recipient, transfer_ammount)
-  #
-  #   # donor_money = List.first(donor_result.balance)
-  #   # recipient_money = List.first(recipient_result.balance)
-  #   #
-  #   # assert donor_money.int == 4898
-  #   # assert donor_money.frac == 49
-  #   #
-  #   # assert recipient_money.int == 406
-  #   # assert recipient_money.frac == 17
-  #
+
+    # donor_money = List.first(donor_result.balance)
+    # recipient_money = List.first(recipient_result.balance)
+    #
+    # assert donor_money.int == 4898
+    # assert donor_money.frac == 49
+    #
+    # assert recipient_money.int == 406
+    # assert recipient_money.frac == 17
+
   # end
   #
   # test "A transfer should be cancelled if an error occurs" do
   #   assert :false
   # end
   #
-  # test "A transfer can be splitted between 2 or more accounts" do
-  #   assert :false
-  # end
+  test "A transfer can be splitted between 2 or more accounts" do
+    donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    first_rec_balance = %FinancialSystem.Money{int: 303, frac: 67}
+    second_rec_balance = %FinancialSystem.Money{int: 303, frac: 67}
+
+    donor = %FinancialSystem.Account{id: 0, balance: [donor_balance]}
+    first_rec = %FinancialSystem.Account{id: 1, balance: [first_rec_balance]}
+    second_rec = %FinancialSystem.Account{id: 2, balance: [second_rec_balance]}
+
+    first_ratio = %FinancialSystem.Ratio{value: 4, neg_exp_of_ten: 1}
+    second_ratio = %FinancialSystem.Ratio{value: 6, neg_exp_of_ten: 1}
+
+    total_transfer = %FinancialSystem.Money{int: 102, frac: 50}
+
+    ratio_acc_list = [%{account: first_rec, ratio: first_ratio},
+      %{account: second_rec, ratio: second_ratio}]
+
+    [donor, first_rec, second_rec] = transfer_split(donor, ratio_acc_list, total_transfer)
+
+
+    donor_money = List.first(donor.balance)
+    first_rec_money = List.first(first_rec.balance)
+    second_rec_money = List.first(second_rec.balance)
+
+    assert donor_money.int == 4898
+    assert donor_money.frac == 49
+
+    assert first_rec_money.int == 344
+    assert first_rec_money.frac == 67
+
+    assert second_rec_money.int == 365
+    assert second_rec_money.frac == 17
+  end
   #
   # test "User should be able to exchange money between different currencies" do
   #   assert :false
