@@ -261,8 +261,8 @@ defmodule FinancialSystem do
   end
 
   @spec sum_ratios(FinancialSystem.Ratio, FinancialSystem.Ratio) :: FinancialSystem.Ratio
-  def sum_ratios(first_ratio, second_ratio) do
-    #First they must be in the same base, and for that we use the smaller base
+  defp sum_ratios(first_ratio, second_ratio) do
+    #First they must be in the same base, and for that we use the greatest base
     greatest_base = if (first_ratio.neg_exp_of_ten >
     second_ratio.neg_exp_of_ten) do
       first_ratio.neg_exp_of_ten
@@ -281,15 +281,14 @@ defmodule FinancialSystem do
 
   end
 
-  @spec is_sum_one([FinancialSystem.Ratio]) :: boolean
+  @spec is_sum_one([FinancialSystem.Ratio]) :: nil
   defp is_sum_one(ratios) do
     total_ratios = Enum.reduce(ratios, fn(x, acc) -> sum_ratios(x, acc) end)
     #there are infinite ways to write one in the ratio notation, so the best check is:
     should_be_zero = sum_ratios(total_ratios, %Ratio{value: -1, neg_exp_of_ten: 0})
     unless (should_be_zero.value == 0) do
-      raise("The sum of the splits isn't the same as the total")
+      exit("The sum of the splits isn't the same as the total")
     end
-    result
   end
 
   @spec mult(FinancialSystem.Money, FinancialSystem.Ratio) :: FinancialSystem.Money
