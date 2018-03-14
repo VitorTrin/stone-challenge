@@ -139,32 +139,23 @@ defmodule FinancialSystemTest do
     assert recipient_money.frac == 17
   end
 
-  # test "User cannot transfer if not enough money available on the account" do
-  #   donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
-  #   recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
-  #
-  #   recipient = %FinancialSystem.Account{id: 0, balance: [recipient_balance]}
-  #   donor = %FinancialSystem.Account{id: 1, balance: [donor_balance]}
-  #
-  #   transfer_ammount = %FinancialSystem.Money{int: 60002, frac: 50}
-  #
-  #   [donor_result, recipient_result] = FinancialSystem.transfer(donor, recipient, transfer_ammount)
+  test "User cannot transfer if not enough money available on the account" do
+    donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
 
-    # donor_money = List.first(donor_result.balance)
-    # recipient_money = List.first(recipient_result.balance)
-    #
-    # assert donor_money.int == 4898
-    # assert donor_money.frac == 49
-    #
-    # assert recipient_money.int == 406
-    # assert recipient_money.frac == 17
+    recipient = %FinancialSystem.Account{id: 0, balance: [recipient_balance]}
+    donor = %FinancialSystem.Account{id: 1, balance: [donor_balance]}
 
-  # end
-  #
+    transfer_ammount = %FinancialSystem.Money{int: 60002, frac: 50}
+
+    catch_exit(FinancialSystem.transfer(donor, recipient, transfer_ammount))
+
+  end
+
   # test "A transfer should be cancelled if an error occurs" do
   #   assert :false
   # end
-  #
+
   test "A transfer can be splitted between 2 or more accounts" do
     donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
     first_rec_balance = %FinancialSystem.Money{int: 303, frac: 67}
