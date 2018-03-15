@@ -86,7 +86,7 @@ defmodule FinancialSystem do
 
     frac_sum = first.frac + second.frac
     int_sum = first.int + second.int
-    #fist value too big for the frac
+    # ten_times_exponent is the fist value too big for the frac.
     ten_times_exponent = pow(10, first.currency.exponent)
     carryover =
       if abs(frac_sum) >= abs(ten_times_exponent) do
@@ -95,11 +95,11 @@ defmodule FinancialSystem do
         0
       end
 
-    #performs the carryover
+    # Performs the carryover.
     return = %Money{int: int_sum + carryover,
       frac: frac_sum - (ten_times_exponent * carryover),
       currency: first.currency}
-    #makes int and frac have the same sign
+    # Makes int and frac have the same sign.
     return = if(return.int != 0 and return.frac != 0) do
       case {return.int < 0, return.frac < 0} do
         {true, false} -> %{return | int: return.int + 1,
@@ -157,11 +157,11 @@ defmodule FinancialSystem do
   """
   @spec transfer(FinancialSystem.Account, FinancialSystem.Account, FinancialSystem.Money) :: %{source: FinancialSystem.Account, destination: FinancialSystem.Account}
   def transfer(source, destination, amount) do
-    #check if source has that amount
+    # Check if source has that amount.
     [sour_balance | _] = Enum.filter(source.balance,
       fn(x) -> (same_currency(x, amount)) end)
     source = if(compare(sour_balance, amount) != :smaller) do
-    #updating the source
+    # Updating the source.
      %{source | balance: Enum.map(source.balance, fn(x) ->
         if x == sour_balance do
           sub(sour_balance, amount)
@@ -172,12 +172,12 @@ defmodule FinancialSystem do
         exit("Attempt to transfer more than source account currently has")
       end
 
-    #updating or creating the destination
+    # Updating or creating the destination.
     [dest_balance | _] = Enum.filter(destination.balance,
       fn(x) -> (same_currency(x, amount)) end)
 
     destination = if dest_balance == nil do
-      #if there is no such currency on the destination, we create it
+      # If there is no such currency on the destination, we create it.
       %{destination | balance: [amount | destination.balance]}
     else
       %{destination | balance: Enum.map(destination.balance, fn(x) ->
@@ -205,41 +205,41 @@ defmodule FinancialSystem do
   """
   @spec exchange(FinancialSystem.Money, FinancialSystem.Currency, FinancialSystem.Ratio) :: FinancialSystem.Money
   def exchange(source, return, rate) do
-    #Fist we apply the rate to the integer part
+    # Fist we apply the rate to the integer part.
     raw_int = source.int * rate.value
     digits_raw_int = Integer.digits(raw_int)
     int_of_raw_int = digits_raw_int |>
       Enum.slice(0, length(digits_raw_int) - rate.neg_exp_of_ten) |>
       Integer.undigits()
 
-    #The fractionary part of the raw_int must be used in the raw_frac
+    # The fractionary part of the raw_int must be used in the raw_frac.
     frac_of_raw_int = digits_raw_int |>
       Enum.slice(length(digits_raw_int) - rate.neg_exp_of_ten, rate.neg_exp_of_ten) |>
       Integer.undigits()
 
-    #Padding zeroes
+    # Padding zeroes.
     overpadded_list = Integer.digits(frac_of_raw_int) ++ List.duplicate(0, @padding)
     frac_of_raw_int = Enum.slice(overpadded_list, 0, return.exponent) |>
       Integer.undigits()
 
-    #We must truncate the frac_of_raw_int to add to frac_sum
+    # We must truncate the frac_of_raw_int to add to frac_sum
     trunc_frac_of_raw_int = Integer.digits(frac_of_raw_int) |>
       Enum.slice(0, return.exponent) |> Integer.undigits()
 
 
-    #diff_in_size lets us know if the size of frac will change and how much
-    #it is positive if it should grow
+    # Diff_in_size lets us know if the size of frac will change and how much
+    # it is positive if it should grow.
     diff_in_size = return.exponent - source.currency.exponent
 
     raw_frac = source.frac * rate.value
     digits_raw_frac = Integer.digits(raw_frac)
-    #Truncating the frac part by removing any aditional digits, after this line
-    #it is in the return frac size
+    # Truncating the frac part by removing any aditional digits, after this line
+    # it is in the return frac size.
     truncated_frac = digits_raw_frac |>
       Enum.slice(0, length(digits_raw_frac) - rate.neg_exp_of_ten + diff_in_size) |>
       Integer.undigits()
 
-    #We are almost there, but we should solve carryovers first
+    # We are almost there, but we should solve carryovers first.
     almost_final_frac = truncated_frac + trunc_frac_of_raw_int
     digits_afc = Integer.digits(almost_final_frac)
 
@@ -262,7 +262,7 @@ defmodule FinancialSystem do
 
   @spec sum_ratios(FinancialSystem.Ratio, FinancialSystem.Ratio) :: FinancialSystem.Ratio
   defp sum_ratios(first_ratio, second_ratio) do
-    #First they must be in the same base, and for that we use the greatest base
+    # First they must be in the same base, and for that we use the greatest base.
     greatest_base = if (first_ratio.neg_exp_of_ten >
     second_ratio.neg_exp_of_ten) do
       first_ratio.neg_exp_of_ten
@@ -284,7 +284,7 @@ defmodule FinancialSystem do
   @spec is_sum_one([FinancialSystem.Ratio]) :: nil
   defp is_sum_one(ratios) do
     total_ratios = Enum.reduce(ratios, fn(x, acc) -> sum_ratios(x, acc) end)
-    #there are infinite ways to write one in the ratio notation, so the best check is:
+    # There are infinite ways to write one in the ratio notation, so the best check is:
     should_be_zero = sum_ratios(total_ratios, %Ratio{value: -1, neg_exp_of_ten: 0})
     unless (should_be_zero.value == 0) do
       exit("The sum of the splits isn't the same as the total")
@@ -293,7 +293,7 @@ defmodule FinancialSystem do
 
   @spec mult(FinancialSystem.Money, FinancialSystem.Ratio) :: FinancialSystem.Money
   defp mult(money, rate) do
-    #Rate multiplication is a case of exchange where the currency stays the same
+    # Rate multiplication is a case of exchange where the currency stays the same.
     exchange(money, money.currency, rate)
   end
 
@@ -308,14 +308,14 @@ defmodule FinancialSystem do
 
   @spec transfer_split(FinancialSystem.Account, [%{account: FinancialSystem.Account, ratio: FinancialSystem.Ratio}], FinancialSystem.Money) :: [FinancialSystem.Account]
   def transfer_split(source, splits, total_transfer) do
-      #First we much check if the sum of all rations is 1
+      # First we much check if the sum of all rations is 1.
       just_the_ratios = Enum.map(splits, fn(x) -> x.ratio end)
       is_sum_one(just_the_ratios)
 
-      #To perform the transfer, first we transfer from the source to a temp account
+      # To perform the transfer, first we transfer from the source to a temp account.
       %{source: source, destination: temp_acc} = transfer(source, %Account{id: -1}, total_transfer)
 
-      #If sucessful, now we can spread it around
+      # If sucessful, now we can spread it around.
       [source | Enum.map(splits, fn(x) -> transfer(temp_acc, x.account,
         mult(total_transfer, x.ratio)).destination end )]
   end
