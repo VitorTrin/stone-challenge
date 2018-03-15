@@ -159,7 +159,7 @@ defmodule FinancialSystem do
   def transfer(source, destination, amount) do
     # Check if source has that amount.
     [sour_balance | _] = Enum.filter(source.balance,
-      fn(x) -> x.currency == amount.currency)) end)
+      fn(x) -> x.currency == amount.currency end)
     source = if(compare(sour_balance, amount) != :smaller) do
     # Updating the source.
      %{source | balance: Enum.map(source.balance, fn(x) ->
@@ -174,7 +174,7 @@ defmodule FinancialSystem do
 
     # Updating or creating the destination.
     [dest_balance | _] = Enum.filter(destination.balance,
-      fn(x) -> x.currency == amount.currency) end)
+      fn(x) -> x.currency == amount.currency end)
 
     destination = if dest_balance == nil do
       # If there is no such currency on the destination, we create it.
@@ -271,12 +271,12 @@ defmodule FinancialSystem do
     %{source: account, destination: temp_acc} =
       transfer(account, %Account{id: -1}, source_ammount)
 
-    temp_acc_balance = first(temp_acc.balance)0
+    temp_acc_balance = List.first(temp_acc.balance)
 
     exchanged_money = exchange(temp_acc_balance, result_currency, ratio)
     %{temp_acc | balance: [exchanged_money]}
 
-    %{source: temp_acc, destination: account} =
+    %{source: _, destination: account} =
       transfer(temp_acc, account, exchanged_money)
 
     account
