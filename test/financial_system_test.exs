@@ -209,7 +209,7 @@ defmodule FinancialSystemTest do
     assert second_rec_money.int == 365
     assert second_rec_money.frac == 17
   end
-  #
+  # 
   # test "User should be able to exchange money between different currencies" do
   #   assert :false
   # end

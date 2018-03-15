@@ -40,8 +40,8 @@ defmodule FinancialSystem do
 
   defmodule Account do
     @moduledoc """
-    Has an unique id and stores the balance in a List of Money as an account cha
-    have multiple currencies.
+    Has an unique id and stores the balance in a List of Money.
+    The negative ids are reserved for internal use.
     """
 
     defstruct id: 0, balance: [%Money{}]
@@ -49,7 +49,7 @@ defmodule FinancialSystem do
 
   defmodule Ratio do
     @moduledoc """
-    Provides a struct that stores exchange rates
+    Provides a struct that stores exchange rates.
     """
 
     defstruct [value: 1, neg_exp_of_ten: 0]
@@ -60,7 +60,7 @@ defmodule FinancialSystem do
   Integer power that is missing from the standard library.
   source: https://twitter.com/quviq/status/768435047569448960
   """
-  #Works because 10^exp in numeric base 'base' is base^exp
+  # Works because 10^exp in numeric base 'base' is base^exp.
   @spec pow(integer, integer) :: integer
   def pow(base, exp) do
     Integer.undigits([1 | :lists.duplicate(exp, 0)], base)
@@ -159,7 +159,7 @@ defmodule FinancialSystem do
   def transfer(source, destination, amount) do
     # Check if source has that amount.
     [sour_balance | _] = Enum.filter(source.balance,
-      fn(x) -> (same_currency(x, amount)) end)
+      fn(x) -> x.currency == amount.currency)) end)
     source = if(compare(sour_balance, amount) != :smaller) do
     # Updating the source.
      %{source | balance: Enum.map(source.balance, fn(x) ->
@@ -174,7 +174,7 @@ defmodule FinancialSystem do
 
     # Updating or creating the destination.
     [dest_balance | _] = Enum.filter(destination.balance,
-      fn(x) -> (same_currency(x, amount)) end)
+      fn(x) -> x.currency == amount.currency) end)
 
     destination = if dest_balance == nil do
       # If there is no such currency on the destination, we create it.
@@ -258,6 +258,28 @@ defmodule FinancialSystem do
     final_int = int_of_raw_int + int_carryover
 
     %Money{int: final_int, frac: final_frac, currency: return}
+  end
+
+  #FIXME:Documentation.
+  # For the moment, currency exchanged doesn't need to come from other account,
+  # which isn't right. In a more complex system, there would be exchange office
+  # account.
+  @spec account_exchange(FinancialSystem.Account, FinancialSystem.Money,
+   FinancialSystem.Currency, FinancialSystem.Ratio) :: FinancialSystem.Account
+  def account_exchange(account, source_ammount, result_currency, ratio) do
+    # To exchange, first we transfer from the account.
+    %{source: account, destination: temp_acc} =
+      transfer(account, %Account{id: -1}, source_ammount)
+
+    temp_acc_balance = first(temp_acc.balance)0
+
+    exchanged_money = exchange(temp_acc_balance, result_currency, ratio)
+    %{temp_acc | balance: [exchanged_money]}
+
+    %{source: temp_acc, destination: account} =
+      transfer(temp_acc, account, exchanged_money)
+
+    account
   end
 
   @spec sum_ratios(FinancialSystem.Ratio, FinancialSystem.Ratio) :: FinancialSystem.Ratio
