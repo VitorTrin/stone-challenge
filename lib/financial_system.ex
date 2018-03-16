@@ -260,10 +260,15 @@ defmodule FinancialSystem do
     %Money{int: final_int, frac: final_frac, currency: return}
   end
 
-  #FIXME:Documentation.
-  # For the moment, currency exchanged doesn't need to come from other account,
-  # which isn't right. In a more complex system, there would be exchange office
-  # account.
+  @doc """
+    Exchanges a certain currency inside an account with another. This way, there's
+    no need of a currency exchange account.
+
+    ### Parameters
+      - source: The amount that is going to be converted.
+      - return: The Currency that is going to be the end result
+      - rate: The Ratio between the source and the return.
+  """
   @spec account_exchange(FinancialSystem.Account, FinancialSystem.Money,
    FinancialSystem.Currency, FinancialSystem.Ratio) :: FinancialSystem.Account
   def account_exchange(account, source_ammount, result_currency, ratio) do
