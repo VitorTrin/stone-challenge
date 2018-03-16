@@ -22,7 +22,8 @@ defmodule FinancialSystem do
     More info at https://en.wikipedia.org/wiki/ISO_4217
     """
 
-    defstruct [alpha_code: "BRL", numeric_code: 986, exponent: 2]
+    defstruct [country_name: "BRAZIL", currency_name: "Brazilian Real",
+      alpha_code: "BRL", numeric_code: 986, exponent: 2]
   end
 
   defmodule Money do
@@ -345,6 +346,37 @@ defmodule FinancialSystem do
       # If sucessful, now we can spread it around.
       [source | Enum.map(splits, fn(x) -> transfer(temp_acc, x.account,
         mult(total_transfer, x.ratio)).destination end )]
+  end
+
+  @spec currency_by_code(String) :: FinancialSystem.Currency
+  def currency_by_code(code) do
+    {:ok, xml} = File.read("currency.xml")
+    after_parse = Quinn.parse(xml)
+
+    # Peeling the xml.
+    layer1 = List.first(after_parse).value
+    table = List.first(layer1).value
+    # Empty map the size of regular one will be the default return of Enum.at/3
+    # so the filter won't stumble on a nill.raw
+    empty = %{value: [
+      %{value: []},
+      %{value: []},
+      %{value: []},
+      %{value: []},
+      %{value: []}
+      ]}
+
+    raw_currency = Enum.filter(table,
+     fn(x) -> Enum.at(x.value, 2, empty).value == [code] end) |> List.first()
+
+    country_name = Enum.at(raw_currency.value, 0).value |> List.first()
+    currency_name = Enum.at(raw_currency.value, 1).value |> List.first()
+    alpha_code = Enum.at(raw_currency.value, 2).value |> List.first()
+    numeric_code = Enum.at(raw_currency.value, 3).value |> List.first()
+    exponent = Enum.at(raw_currency.value, 4).value |> List.first()
+
+    %Currency{country_name: country_name, currency_name: currency_name,
+      alpha_code: alpha_code, numeric_code: numeric_code, exponent: exponent}
   end
 
 end
