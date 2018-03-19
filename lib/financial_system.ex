@@ -389,6 +389,9 @@ defmodule FinancialSystem do
     ]
   end
 
+  @doc """
+    Fetches complete currency information using alphabetic code.
+  """
   @spec currency_by_code(String) :: FinancialSystem.Currency
   def currency_by_code(code) do
     {:ok, xml} = File.read("currency.xml")
