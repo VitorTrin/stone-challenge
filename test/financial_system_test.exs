@@ -6,115 +6,142 @@ defmodule FinancialSystemTest do
   # Sum
   test "sum/2 should sum Money" do
     # 1 + 1 = 2
-    assert sum(%FinancialSystem.Money{int: 1}, %FinancialSystem.Money{int: 1})
-      == %FinancialSystem.Money{int: 2}
+    assert sum(%FinancialSystem.Money{int: 1}, %FinancialSystem.Money{int: 1}) ==
+             %FinancialSystem.Money{int: 2}
+
     # 50 + 200 = 250
-    assert sum(%FinancialSystem.Money{int: 50}, %FinancialSystem.Money{int: 200})
-      == %FinancialSystem.Money{int: 250}
+    assert sum(%FinancialSystem.Money{int: 50}, %FinancialSystem.Money{int: 200}) ==
+             %FinancialSystem.Money{int: 250}
+
     # (-50) + 200 = 150
-    assert sum(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: 200})
-      == %FinancialSystem.Money{int: 150}
+    assert sum(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: 200}) ==
+             %FinancialSystem.Money{int: 150}
+
     # (-50) + (-200) = (-250)
-    assert sum(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: -200})
-        == %FinancialSystem.Money{int: -250}
+    assert sum(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: -200}) ==
+             %FinancialSystem.Money{int: -250}
+
     # 0.1 + 0.1 = 0.2
-    assert sum(%FinancialSystem.Money{frac: 1},
-    %FinancialSystem.Money{frac: 1})
-      == %FinancialSystem.Money{frac: 2}
+    assert sum(%FinancialSystem.Money{frac: 1}, %FinancialSystem.Money{frac: 1}) ==
+             %FinancialSystem.Money{frac: 2}
+
     # 0.2 + 0.73 = 0.93
-    assert sum(%FinancialSystem.Money{frac: 20},
-    %FinancialSystem.Money{frac: 73})
-      == %FinancialSystem.Money{frac: 93}
+    assert sum(%FinancialSystem.Money{frac: 20}, %FinancialSystem.Money{frac: 73}) ==
+             %FinancialSystem.Money{frac: 93}
+
     # 0.9 + 0.1 = 1
-    assert sum(%FinancialSystem.Money{frac: 90},
-    %FinancialSystem.Money{frac: 10})
-      == %FinancialSystem.Money{int: 1}
+    assert sum(%FinancialSystem.Money{frac: 90}, %FinancialSystem.Money{frac: 10}) ==
+             %FinancialSystem.Money{int: 1}
+
     # 0.56 + 0.74 = 1.3
-    assert sum(%FinancialSystem.Money{frac: 56},
-    %FinancialSystem.Money{frac: 74})
-      == %FinancialSystem.Money{int: 1, frac: 30}
+    assert sum(%FinancialSystem.Money{frac: 56}, %FinancialSystem.Money{frac: 74}) ==
+             %FinancialSystem.Money{int: 1, frac: 30}
+
     # 12.34 + 56.78 = 69.12
-    assert sum(%FinancialSystem.Money{int: 12, frac: 34},
-    %FinancialSystem.Money{int: 56, frac: 78})
-      == %FinancialSystem.Money{int: 69, frac: 12}
+    assert sum(%FinancialSystem.Money{int: 12, frac: 34}, %FinancialSystem.Money{
+             int: 56,
+             frac: 78
+           }) == %FinancialSystem.Money{int: 69, frac: 12}
+
     # 1.75 + (- 0.99) = 0.76
-    assert sum(%FinancialSystem.Money{int: 1, frac: 75},
-    %FinancialSystem.Money{int: 0, frac: -99})
-      == %FinancialSystem.Money{int: 0, frac: 76}
+    assert sum(%FinancialSystem.Money{int: 1, frac: 75}, %FinancialSystem.Money{int: 0, frac: -99}) ==
+             %FinancialSystem.Money{int: 0, frac: 76}
   end
 
   # Sub
   test "sub/2 should subtract Money" do
     # 1 - 1 = 0
-    assert sub(%FinancialSystem.Money{int: 1}, %FinancialSystem.Money{int: 1})
-      == %FinancialSystem.Money{int: 0}
+    assert sub(%FinancialSystem.Money{int: 1}, %FinancialSystem.Money{int: 1}) ==
+             %FinancialSystem.Money{int: 0}
+
     # 50 - 200 = (-150)
-    assert sub(%FinancialSystem.Money{int: 50}, %FinancialSystem.Money{int: 200})
-      == %FinancialSystem.Money{int: -150}
+    assert sub(%FinancialSystem.Money{int: 50}, %FinancialSystem.Money{int: 200}) ==
+             %FinancialSystem.Money{int: -150}
+
     # (-50) - 200 = (-250)
-    assert sub(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: 200})
-      == %FinancialSystem.Money{int: -250}
+    assert sub(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: 200}) ==
+             %FinancialSystem.Money{int: -250}
+
     # (-50) - (-200) = 150
-    assert sub(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: -200})
-        == %FinancialSystem.Money{int: 150}
+    assert sub(%FinancialSystem.Money{int: -50}, %FinancialSystem.Money{int: -200}) ==
+             %FinancialSystem.Money{int: 150}
+
     # 0.1 - 0.1 = 0
-    assert sub(%FinancialSystem.Money{frac: 1},
-    %FinancialSystem.Money{frac: 1})
-      == %FinancialSystem.Money{int: 0}
+    assert sub(%FinancialSystem.Money{frac: 1}, %FinancialSystem.Money{frac: 1}) ==
+             %FinancialSystem.Money{int: 0}
+
     # 0.2 - 0.73 = (-0.53)
-    assert sub(%FinancialSystem.Money{frac: 20},
-    %FinancialSystem.Money{frac: 73})
-      == %FinancialSystem.Money{frac: -53}
+    assert sub(%FinancialSystem.Money{frac: 20}, %FinancialSystem.Money{frac: 73}) ==
+             %FinancialSystem.Money{frac: -53}
+
     # 0.9 - 0.1 = 0.8
-    assert sub(%FinancialSystem.Money{frac: 90},
-    %FinancialSystem.Money{frac: 10})
-      == %FinancialSystem.Money{frac: 80}
+    assert sub(%FinancialSystem.Money{frac: 90}, %FinancialSystem.Money{frac: 10}) ==
+             %FinancialSystem.Money{frac: 80}
+
     # 0.56 - 0.74 = (-0.18)
-    assert sub(%FinancialSystem.Money{frac: 56},
-    %FinancialSystem.Money{frac: 74})
-      == %FinancialSystem.Money{int: 0, frac: -18}
+    assert sub(%FinancialSystem.Money{frac: 56}, %FinancialSystem.Money{frac: 74}) ==
+             %FinancialSystem.Money{int: 0, frac: -18}
+
     # 12.34 - 56.78 = 44.44
-    assert sub(%FinancialSystem.Money{int: 12, frac: 34},
-    %FinancialSystem.Money{int: 56, frac: 78})
-      == %FinancialSystem.Money{int: -44, frac: -44}
+    assert sub(%FinancialSystem.Money{int: 12, frac: 34}, %FinancialSystem.Money{
+             int: 56,
+             frac: 78
+           }) == %FinancialSystem.Money{int: -44, frac: -44}
+
     # 1.75 - (- 0.99) = 1.74
-    assert sub(%FinancialSystem.Money{int: 1, frac: 75},
-    %FinancialSystem.Money{int: 0, frac: -99})
-      == %FinancialSystem.Money{int: 2, frac: 74}
+    assert sub(%FinancialSystem.Money{int: 1, frac: 75}, %FinancialSystem.Money{int: 0, frac: -99}) ==
+             %FinancialSystem.Money{int: 2, frac: 74}
   end
 
   # Compare
   test "compare/2 should compare money ammounts" do
     # 1 ? 1 = :equal
-    assert compare(%FinancialSystem.Money{int: 1},
-      %FinancialSystem.Money{int: 1}) == :equal
+    assert compare(%FinancialSystem.Money{int: 1}, %FinancialSystem.Money{int: 1}) == :equal
     #  0 ? 1 = :smaller
-    assert compare(%FinancialSystem.Money{int: 0},
-        %FinancialSystem.Money{int: 1}) == :smaller
+    assert compare(%FinancialSystem.Money{int: 0}, %FinancialSystem.Money{int: 1}) == :smaller
     #  1 ? 0 = :greater
-    assert compare(%FinancialSystem.Money{int: 1},
-        %FinancialSystem.Money{int: 0}) == :greater
+    assert compare(%FinancialSystem.Money{int: 1}, %FinancialSystem.Money{int: 0}) == :greater
     # 0.1 ? 0.1 = :equal
-    assert compare(%FinancialSystem.Money{int: 1, frac: 1},
-      %FinancialSystem.Money{int: 1, frac: 1}) == :equal
+    assert compare(%FinancialSystem.Money{int: 1, frac: 1}, %FinancialSystem.Money{
+             int: 1,
+             frac: 1
+           }) == :equal
+
     #  0.1 ? 1.1 = :smaller
-    assert compare(%FinancialSystem.Money{int: 0, frac: 1},
-        %FinancialSystem.Money{int: 1, frac: 1}) == :smaller
+    assert compare(%FinancialSystem.Money{int: 0, frac: 1}, %FinancialSystem.Money{
+             int: 1,
+             frac: 1
+           }) == :smaller
+
     #  1.1 ? 0.1 = :greater
-    assert compare(%FinancialSystem.Money{int: 1, frac: 1},
-        %FinancialSystem.Money{int: 0, frac: 1}) == :greater
+    assert compare(%FinancialSystem.Money{int: 1, frac: 1}, %FinancialSystem.Money{
+             int: 0,
+             frac: 1
+           }) == :greater
+
     # 1.2 ? 1.1 = :greater
-    assert compare(%FinancialSystem.Money{int: 1, frac: 2},
-        %FinancialSystem.Money{int: 1, frac: 1}) == :greater
+    assert compare(%FinancialSystem.Money{int: 1, frac: 2}, %FinancialSystem.Money{
+             int: 1,
+             frac: 1
+           }) == :greater
+
     # 0.2 ? 1.0 = :smaller
-    assert compare(%FinancialSystem.Money{int: 0, frac: 2},
-      %FinancialSystem.Money{int: 1, frac: 0}) == :smaller
+    assert compare(%FinancialSystem.Money{int: 0, frac: 2}, %FinancialSystem.Money{
+             int: 1,
+             frac: 0
+           }) == :smaller
+
     # 0.2 ? -1.0 = :greater
-    assert compare(%FinancialSystem.Money{int: 0, frac: 2},
-      %FinancialSystem.Money{int: -1, frac: 0}) == :greater
+    assert compare(%FinancialSystem.Money{int: 0, frac: 2}, %FinancialSystem.Money{
+             int: -1,
+             frac: 0
+           }) == :greater
+
     # -0.2 ? -1.0 = :greater
-    assert compare(%FinancialSystem.Money{int: 0, frac: -2},
-      %FinancialSystem.Money{int: -1, frac: 0}) == :greater
+    assert compare(%FinancialSystem.Money{int: 0, frac: -2}, %FinancialSystem.Money{
+             int: -1,
+             frac: 0
+           }) == :greater
   end
 
   # Behavior tests.
@@ -127,7 +154,8 @@ defmodule FinancialSystemTest do
 
     transfer_ammount = %FinancialSystem.Money{int: 102, frac: 50}
 
-    %{source: donor_result, destination: recipient_result} = FinancialSystem.transfer(donor, recipient, transfer_ammount)
+    %{source: donor_result, destination: recipient_result} =
+      FinancialSystem.transfer(donor, recipient, transfer_ammount)
 
     donor_money = List.first(donor_result.balance)
     recipient_money = List.first(recipient_result.balance)
@@ -149,7 +177,6 @@ defmodule FinancialSystemTest do
     transfer_ammount = %FinancialSystem.Money{int: 60002, frac: 50}
 
     catch_exit(FinancialSystem.transfer(donor, recipient, transfer_ammount))
-
   end
 
   test "A transfer should be cancelled if an error occurs" do
@@ -163,7 +190,10 @@ defmodule FinancialSystemTest do
 
     # This generates a warning as the match never happens, but we match anyway
     # for testing purposes.
-    catch_exit(%{source: donor, destination: recipient} = FinancialSystem.transfer(donor, recipient, transfer_ammount))
+    catch_exit(
+      %{source: donor, destination: recipient} =
+        FinancialSystem.transfer(donor, recipient, transfer_ammount)
+    )
 
     donor_balance = List.first(donor.balance)
     recipient_balance = List.first(recipient.balance)
@@ -173,7 +203,6 @@ defmodule FinancialSystemTest do
 
     assert recipient_balance.int == 303
     assert recipient_balance.frac == 67
-
   end
 
   test "A transfer can be splitted between 2 or more accounts" do
@@ -190,11 +219,12 @@ defmodule FinancialSystemTest do
 
     total_transfer = %FinancialSystem.Money{int: 102, frac: 50}
 
-    ratio_acc_list = [%{account: first_rec, ratio: first_ratio},
-      %{account: second_rec, ratio: second_ratio}]
+    ratio_acc_list = [
+      %{account: first_rec, ratio: first_ratio},
+      %{account: second_rec, ratio: second_ratio}
+    ]
 
     [donor, first_rec, second_rec] = transfer_split(donor, ratio_acc_list, total_transfer)
-
 
     donor_money = List.first(donor.balance)
     first_rec_money = List.first(first_rec.balance)
@@ -209,12 +239,15 @@ defmodule FinancialSystemTest do
     assert second_rec_money.int == 365
     assert second_rec_money.frac == 17
   end
-  # 
+
+  #
   # test "User should be able to exchange money between different currencies" do
   #   assert :false
   # end
   #
-  # test "Currencies should be in compliance with ISO 4217" do
-  #   assert :false
-  # end
+  test "Currencies should be in compliance with ISO 4217" do
+    euro = currency_by_code("EUR")
+    assert euro.numeric_code == "978"
+    assert euro.exponet == 2
+  end
 end
