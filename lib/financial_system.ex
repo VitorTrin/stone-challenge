@@ -170,7 +170,8 @@ defmodule FinancialSystem do
         }
   def transfer(source, destination, amount) do
     # Check if source has that amount.
-    [sour_balance | _] = Enum.filter(source.balance, fn x -> x.currency == amount.currency end)
+    sour_balance =
+      Enum.filter(source.balance, fn x -> x.currency == amount.currency end) |> List.first()
 
     source =
       if compare(sour_balance, amount) != :smaller do
@@ -191,8 +192,8 @@ defmodule FinancialSystem do
       end
 
     # Updating or creating the destination.
-    [dest_balance | _] =
-      Enum.filter(destination.balance, fn x -> x.currency == amount.currency end)
+    dest_balance =
+      Enum.filter(destination.balance, fn x -> x.currency == amount.currency end) |> List.first()
 
     destination =
       if dest_balance == nil do
@@ -308,8 +309,9 @@ defmodule FinancialSystem do
           FinancialSystem.Ratio
         ) :: FinancialSystem.Account
   def account_exchange(account, source_ammount, result_currency, ratio) do
-    [sour_balance | _] =
+    sour_balance =
       Enum.filter(account.balance, fn x -> x.currency == source_ammount.currency end)
+      |> List.first()
 
     if compare(sour_balance, source_ammount) == :smaller do
       exit("Not enough money in account to perform this exchange")
@@ -322,7 +324,7 @@ defmodule FinancialSystem do
     temp_acc_balance = List.first(temp_acc.balance)
 
     exchanged_money = exchange(temp_acc_balance, result_currency, ratio)
-    %{temp_acc | balance: [exchanged_money]}
+    temp_acc = %{temp_acc | balance: [exchanged_money]}
 
     %{source: _, destination: account} = transfer(temp_acc, account, exchanged_money)
 
@@ -401,12 +403,12 @@ defmodule FinancialSystem do
   """
   @spec currency_by_code(String) :: FinancialSystem.Currency
   def currency_by_code(code) do
-    case File.read("currency.xml") do
-      {:ok, xml} -> Quinn.parse(xml)
-      {:error} -> exit("Failed to read from currency.xml.")
-      _ -> exit("Unknown error at File.read/1 inside currency_by_code/1.")
-    end
-    after_parse = Quinn.parse(xml)
+    after_parse =
+      case File.read("currency.xml") do
+        {:ok, xml} -> Quinn.parse(xml)
+        {:error} -> exit("Failed to read from currency.xml.")
+        _ -> exit("Unknown error at File.read/1 inside currency_by_code/1.")
+      end
 
     # Peeling the xml.
     layer1 = List.first(after_parse).value
@@ -427,14 +429,14 @@ defmodule FinancialSystem do
       Enum.filter(table, fn x -> Enum.at(x.value, 2, empty).value == [code] end) |> List.first()
 
     if(raw_currency == nil) do
-      exit ("Code not found.")
+      exit("Code not found.")
     end
 
     country_name = Enum.at(raw_currency.value, 0).value |> List.first()
     currency_name = Enum.at(raw_currency.value, 1).value |> List.first()
     alpha_code = Enum.at(raw_currency.value, 2).value |> List.first()
     numeric_code = Enum.at(raw_currency.value, 3).value |> List.first()
-    exponent = Enum.at(raw_currency.value, 4).value |> List.first()
+    exponent = Enum.at(raw_currency.value, 4).value |> List.first() |> String.to_integer()
 
     %Currency{
       country_name: country_name,

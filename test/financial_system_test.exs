@@ -240,14 +240,33 @@ defmodule FinancialSystemTest do
     assert second_rec_money.frac == 17
   end
 
-  #
-  # test "User should be able to exchange money between different currencies" do
-  #   assert :false
-  # end
-  #
+  test "User should be able to exchange money between different currencies" do
+    account_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    account = %FinancialSystem.Account{id: 0, balance: [account_balance]}
+
+    usd = currency_by_code("USD")
+
+    transfer_ammount = %FinancialSystem.Money{int: 300, frac: 50}
+
+    real_usd = %FinancialSystem.Ratio{value: 2}
+
+    account = account_exchange(account, transfer_ammount, usd, real_usd)
+
+    real = currency_by_code("BRL")
+
+    [result_real | _] = Enum.filter(account.balance, fn x -> x.currency == real end)
+
+    [result_usd | _] = Enum.filter(account.balance, fn x -> x.currency == usd end)
+
+    assert result_usd.int == 601
+    assert result_usd.frac == 0
+    assert result_real.int == 4700
+    assert result_real.frac == 49
+  end
+
   test "Currencies should be in compliance with ISO 4217" do
     euro = currency_by_code("EUR")
     assert euro.numeric_code == "978"
-    assert euro.exponet == 2
+    assert euro.exponent == 2
   end
 end
