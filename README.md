@@ -32,10 +32,10 @@ Para utilizar as funções primeiro conheça as estruturas:
 * **Currency**: Representa uma moeda. Deve ser inicializada pela função currency_by_code/1.
 * **Ratio**: Razão entre moedas, utilizada pra câmbio. É um numero decimal, mas possui abordagem diferente de **Money**, com **value** de mantissa e **neg_exp_of_ten** como expoente negativo de dez.  
 
-##Licença
+## Licença
 
 Este projeto está na licensa MIT.
 
-##Créditos
+## Créditos
 
 Projeto individual de Vítor Trindade.
