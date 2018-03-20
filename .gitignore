@@ -1,1 +1,5 @@
 _build/
+deps/
+key
+key.pub
+mix.lock
