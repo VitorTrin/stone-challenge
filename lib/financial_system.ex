@@ -308,6 +308,13 @@ defmodule FinancialSystem do
           FinancialSystem.Ratio
         ) :: FinancialSystem.Account
   def account_exchange(account, source_ammount, result_currency, ratio) do
+    [sour_balance | _] =
+      Enum.filter(account.balance, fn x -> x.currency == source_ammount.currency end)
+
+    if compare(sour_balance, source_ammount) == :smaller do
+      exit("Not enough money in account to perform this exchange")
+    end
+
     # To exchange, first we transfer from the account.
     %{source: account, destination: temp_acc} =
       transfer(account, %Account{id: -1}, source_ammount)
@@ -394,7 +401,11 @@ defmodule FinancialSystem do
   """
   @spec currency_by_code(String) :: FinancialSystem.Currency
   def currency_by_code(code) do
-    {:ok, xml} = File.read("currency.xml")
+    case File.read("currency.xml") do
+      {:ok, xml} -> Quinn.parse(xml)
+      {:error} -> exit("Failed to read from currency.xml.")
+      _ -> exit("Unknown error at File.read/1 inside currency_by_code/1.")
+    end
     after_parse = Quinn.parse(xml)
 
     # Peeling the xml.
@@ -414,6 +425,10 @@ defmodule FinancialSystem do
 
     raw_currency =
       Enum.filter(table, fn x -> Enum.at(x.value, 2, empty).value == [code] end) |> List.first()
+
+    if(raw_currency == nil) do
+      exit ("Code not found.")
+    end
 
     country_name = Enum.at(raw_currency.value, 0).value |> List.first()
     currency_name = Enum.at(raw_currency.value, 1).value |> List.first()
