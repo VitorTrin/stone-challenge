@@ -65,7 +65,7 @@ defmodule FinancialSystem do
   """
   # Works because 10^exp in numeric base 'base' is base^exp.
   @spec pow(integer, integer) :: integer
-  def pow(base, exp) do
+  defp pow(base, exp) do
     Integer.undigits([1 | :lists.duplicate(exp, 0)], base)
   end
 
@@ -73,7 +73,7 @@ defmodule FinancialSystem do
   Tests if 2 maps use the same currency by checking their currency field.
   """
   @spec same_currency(FinancialSystem.Money, FinancialSystem.Money) :: boolean
-  def same_currency(first, second) do
+  defp same_currency(first, second) do
     unless first.currency == second.currency do
       exit("Attempt to operate distinct currencies without exchange")
     end

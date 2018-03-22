@@ -310,7 +310,11 @@ defmodule FinancialSystemTest do
     second_recipient_balance = %FinancialSystem.Money{int: 3333, frac: 65, currency: yen}
 
     donor = %FinancialSystem.Account{id: 1, balance: [donor_balance, second_donor_balance]}
-    recipient = %FinancialSystem.Account{id: 0, balance: [recipient_balance, second_recipient_balance]}
+
+    recipient = %FinancialSystem.Account{
+      id: 0,
+      balance: [recipient_balance, second_recipient_balance]
+    }
 
     transfer_ammount = %FinancialSystem.Money{int: 102, frac: 50}
 
@@ -338,7 +342,6 @@ defmodule FinancialSystemTest do
     real_usd = %FinancialSystem.Ratio{value: 2}
 
     catch_exit(account = account_exchange(account, transfer_ammount, usd, real_usd))
-
   end
 
   test "A transfer split must be cancelled if the sums of the splits aren't 1" do
@@ -361,7 +364,6 @@ defmodule FinancialSystemTest do
     ]
 
     catch_exit(transfer_split(donor, ratio_acc_list, total_transfer))
-
   end
 
   test "the application must exit if currency_by_code fails to find the currency" do
