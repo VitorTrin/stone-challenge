@@ -282,4 +282,89 @@ defmodule FinancialSystemTest do
     catch_exit(sub(botswana_money, japanese_money))
     catch_exit(compare(botswana_money, japanese_money))
   end
+
+  test "sum performs negative carryover" do
+    neg_twenty = %FinancialSystem.Money{int: -2, frac: -70}
+
+    result = sum(neg_twenty, neg_twenty)
+
+    assert result.int == -5
+    assert result.frac == -40
+  end
+
+  test "sum results shouldn't have negative int and positive frac" do
+    two = %FinancialSystem.Money{int: 2, frac: 40}
+    neg_four = %FinancialSystem.Money{int: -4, frac: -30}
+
+    result = sum(two, neg_four)
+
+    assert result.int == -1
+    assert result.frac == -90
+  end
+
+  test "the accounts involved in a transfer may have more than one currency in dest_balance" do
+    donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
+    yen = currency_by_code("JPY")
+    second_donor_balance = %FinancialSystem.Money{int: 3333, frac: 65, currency: yen}
+    second_recipient_balance = %FinancialSystem.Money{int: 3333, frac: 65, currency: yen}
+
+    donor = %FinancialSystem.Account{id: 1, balance: [donor_balance, second_donor_balance]}
+    recipient = %FinancialSystem.Account{id: 0, balance: [recipient_balance, second_recipient_balance]}
+
+    transfer_ammount = %FinancialSystem.Money{int: 102, frac: 50}
+
+    %{source: donor_result, destination: recipient_result} =
+      FinancialSystem.transfer(donor, recipient, transfer_ammount)
+
+    donor_money = List.first(donor_result.balance)
+    recipient_money = List.first(recipient_result.balance)
+
+    assert donor_money.int == 4898
+    assert donor_money.frac == 49
+
+    assert recipient_money.int == 406
+    assert recipient_money.frac == 17
+  end
+
+  test "An exchange must be cancelled if there is not enough money" do
+    account_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    account = %FinancialSystem.Account{id: 0, balance: [account_balance]}
+
+    usd = currency_by_code("USD")
+
+    transfer_ammount = %FinancialSystem.Money{int: 30000, frac: 50}
+
+    real_usd = %FinancialSystem.Ratio{value: 2}
+
+    catch_exit(account = account_exchange(account, transfer_ammount, usd, real_usd))
+
+  end
+
+  test "A transfer split must be cancelled if the sums of the splits aren't 1" do
+    donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
+    first_rec_balance = %FinancialSystem.Money{int: 303, frac: 67}
+    second_rec_balance = %FinancialSystem.Money{int: 303, frac: 67}
+
+    donor = %FinancialSystem.Account{id: 0, balance: [donor_balance]}
+    first_rec = %FinancialSystem.Account{id: 1, balance: [first_rec_balance]}
+    second_rec = %FinancialSystem.Account{id: 2, balance: [second_rec_balance]}
+
+    first_ratio = %FinancialSystem.Ratio{value: 3, neg_exp_of_ten: 1}
+    second_ratio = %FinancialSystem.Ratio{value: 6, neg_exp_of_ten: 1}
+
+    total_transfer = %FinancialSystem.Money{int: 102, frac: 50}
+
+    ratio_acc_list = [
+      %{account: first_rec, ratio: first_ratio},
+      %{account: second_rec, ratio: second_ratio}
+    ]
+
+    catch_exit(transfer_split(donor, ratio_acc_list, total_transfer))
+
+  end
+
+  test "the application must exit if currency_by_code fails to find the currency" do
+    catch_exit(currency_by_code("NVL"))
+  end
 end
