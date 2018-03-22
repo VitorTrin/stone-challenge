@@ -144,7 +144,7 @@ defmodule FinancialSystemTest do
            }) == :greater
   end
 
-  # Behavior tests.
+  # Required Behavior tests.
   test "User should be able to transfer money to another account" do
     donor_balance = %FinancialSystem.Money{int: 5000, frac: 99}
     recipient_balance = %FinancialSystem.Money{int: 303, frac: 67}
@@ -269,4 +269,20 @@ defmodule FinancialSystemTest do
     assert euro.numeric_code == "978"
     assert euro.exponent == 2
   end
+
+  ## Tests created because coverage tool showed uncovered lines
+  test "Attempts to operate with different currencies without exchange should cancel" do
+    yen = currency_by_code("JPY")
+    pula = currency_by_code("BWP")
+
+    japanese_money = %FinancialSystem.Money{int: 5, frac: 29, currency: yen}
+    botswana_money = %FinancialSystem.Money{int: 34, frac: 8, currency: pula}
+
+    catch_exit(sum(japanese_money, botswana_money))
+    catch_exit(sub(botswana_money, japanese_money))
+    catch_exit(compare(botswana_money, japanese_money))
+
+  end
+
+
 end
