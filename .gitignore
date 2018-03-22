@@ -1,5 +1,6 @@
 _build/
 deps/
+cover/
 key
 key.pub
 mix.lock
