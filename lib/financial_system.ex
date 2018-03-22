@@ -94,10 +94,10 @@ defmodule FinancialSystem do
     ten_times_exponent = pow(10, first.currency.exponent)
 
     carryover =
-      if abs(frac_sum) >= abs(ten_times_exponent) do
-        1
-      else
-        0
+      case {abs(frac_sum) >= abs(ten_times_exponent), frac_sum > 0} do
+        {true, true} -> 1
+        {true, false} -> -1
+        _ -> 0
       end
 
     # Performs the carryover.

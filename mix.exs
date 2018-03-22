@@ -22,9 +22,9 @@ defmodule FinancialSystem.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      #XML Parser
+      # XML Parser
       {:quinn, "~> 1.1"},
-      #Test coverage tool
+      # Test coverage tool
       {:coverex, "~> 1.4.10", only: :test}
     ]
   end

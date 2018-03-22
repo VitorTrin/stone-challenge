@@ -281,8 +281,5 @@ defmodule FinancialSystemTest do
     catch_exit(sum(japanese_money, botswana_money))
     catch_exit(sub(botswana_money, japanese_money))
     catch_exit(compare(botswana_money, japanese_money))
-
   end
-
-
 end
