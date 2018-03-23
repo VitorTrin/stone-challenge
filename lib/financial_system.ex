@@ -59,7 +59,6 @@ defmodule FinancialSystem do
     defstruct value: 1, neg_exp_of_ten: 0
   end
 
-
   # Integer power that is missing from the standard library.
   # source: https://twitter.com/quviq/status/768435047569448960
   # Works because 10^exp in numeric base 'base' is base^exp.
@@ -67,7 +66,6 @@ defmodule FinancialSystem do
   defp pow(base, exp) do
     Integer.undigits([1 | :lists.duplicate(exp, 0)], base)
   end
-
 
   # Tests if 2 maps use the same currency by checking their currency field.
   @spec same_currency(FinancialSystem.Money, FinancialSystem.Money) :: boolean
