@@ -14,15 +14,19 @@ Este é o meu projeto para o desafio https://github.com/stone-payments/tech-chal
 
 ## Dependências
 
-* Elixir 1.6 ou superior
-* Quinn 1.1 ou superior: utilizado para recuperar informação sobre as moedas
-* Coverex: utilizado para teste de cobertura
+* Elixir 1.6 ou superior.
+* Quinn 1.1 ou superior: utilizado para recuperar informação sobre as moedas.
+* Coverex: utilizado para teste de cobertura.
 
 Mais informações no arquivo mix.exs.
 
 ## Como instalar?
 
-**TODO**
+```
+git clone https://github.com/VitorTrin/stone-challenge.git
+cd stone-challenge/
+mix deps.get
+```
 
 ## Como usar?
 
@@ -49,6 +53,28 @@ Primeiro se familiarize com as estruturas e funções:
 `Currency` deve ser criado com a função `currency_by_code/3` caso não seja o Real.
 Todas as funções poder interromper a execução do programa por meio de `exit`, nenhuma delas retorna `{:ok, result}`.
 
+## Como executar?
+```
+iex -S mix
+```
+## Como testar  ?
+```
+mix test
+```
+Ou caso queira gerar os relatórios de cobertura:
+
+```
+mix test --cover
+```
+
+## Algo mais que eu deva saber?
+
+Sempre que realizar alguma alteração no código, execute
+
+```
+mix format
+```
+para formatar o código.
 
 ## Licença
 
